@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ONP.API.Data;
 
@@ -11,9 +12,11 @@ using ONP.API.Data;
 namespace ONP.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250414011051_profilePicAdding")]
+    partial class profilePicAdding
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -462,61 +465,6 @@ namespace ONP.API.Migrations
                     b.ToTable("FavoriteCourses");
                 });
 
-            modelBuilder.Entity("ONP.API.Entity.Job", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ContactEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("PostedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Jobs");
-                });
-
-            modelBuilder.Entity("ONP.API.Entity.TrackedJob", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("JobId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StudentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("TrackedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("JobId");
-
-                    b.HasIndex("StudentId", "JobId")
-                        .IsUnique();
-
-                    b.ToTable("TrackedJobs");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -701,25 +649,6 @@ namespace ONP.API.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("ONP.API.Entity.TrackedJob", b =>
-                {
-                    b.HasOne("ONP.API.Entity.Job", "Job")
-                        .WithMany("TrackedBy")
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ONP.API.Entity.ApplicationUser", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Job");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("ONP.API.Entity.Category", b =>
                 {
                     b.Navigation("Courses");
@@ -728,11 +657,6 @@ namespace ONP.API.Migrations
             modelBuilder.Entity("ONP.API.Entity.Course", b =>
                 {
                     b.Navigation("Contents");
-                });
-
-            modelBuilder.Entity("ONP.API.Entity.Job", b =>
-                {
-                    b.Navigation("TrackedBy");
                 });
 #pragma warning restore 612, 618
         }

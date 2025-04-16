@@ -19,6 +19,9 @@ namespace ONP.API.Data
 
 		public DbSet<FavoriteCourse> FavoriteCourses { get; set; }
 		public DbSet<CartItem> CartItems { get; set; }
+
+		public DbSet<Job> Jobs { get; set; }
+		public DbSet<TrackedJob> TrackedJobs { get; set; }
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
@@ -121,6 +124,9 @@ namespace ONP.API.Data
 				.HasForeignKey(f => f.StudentId)
 				.OnDelete(DeleteBehavior.Cascade);
 
+			builder.Entity<TrackedJob>()
+				.HasIndex(t => new { t.StudentId, t.JobId })
+				.IsUnique(); // يمنع الطالب يضيف نفس الوظيفة مرتين
 		}
 
 	}
