@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ONP.API.Data;
 
@@ -11,9 +12,11 @@ using ONP.API.Data;
 namespace ONP.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250421235714_addWithdrawl")]
+    partial class addWithdrawl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,7 +258,7 @@ namespace ONP.API.Migrations
                     b.HasIndex("StudentId", "CourseId")
                         .IsUnique();
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.Category", b =>
@@ -272,7 +275,7 @@ namespace ONP.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.CodeSnippet", b =>
@@ -309,7 +312,7 @@ namespace ONP.API.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("CodeSnippets", (string)null);
+                    b.ToTable("CodeSnippets");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.Course", b =>
@@ -351,7 +354,7 @@ namespace ONP.API.Migrations
 
                     b.HasIndex("InstructorId");
 
-                    b.ToTable("Courses", (string)null);
+                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.CourseContent", b =>
@@ -386,7 +389,7 @@ namespace ONP.API.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CourseContents", (string)null);
+                    b.ToTable("CourseContents");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.CourseProgress", b =>
@@ -419,7 +422,7 @@ namespace ONP.API.Migrations
                     b.HasIndex("StudentId", "ContentId")
                         .IsUnique();
 
-                    b.ToTable("CourseProgress", (string)null);
+                    b.ToTable("CourseProgress");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.CourseRating", b =>
@@ -450,7 +453,7 @@ namespace ONP.API.Migrations
                     b.HasIndex("CourseId", "StudentId")
                         .IsUnique();
 
-                    b.ToTable("CourseRatings", (string)null);
+                    b.ToTable("CourseRatings");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.Enrollment", b =>
@@ -478,7 +481,7 @@ namespace ONP.API.Migrations
                     b.HasIndex("StudentId", "CourseId")
                         .IsUnique();
 
-                    b.ToTable("Enrollments", (string)null);
+                    b.ToTable("Enrollments");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.FavoriteCourse", b =>
@@ -506,7 +509,7 @@ namespace ONP.API.Migrations
                     b.HasIndex("StudentId", "CourseId")
                         .IsUnique();
 
-                    b.ToTable("FavoriteCourses", (string)null);
+                    b.ToTable("FavoriteCourses");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.Job", b =>
@@ -533,7 +536,7 @@ namespace ONP.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Jobs", (string)null);
+                    b.ToTable("Jobs");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.LessonCode", b =>
@@ -559,7 +562,7 @@ namespace ONP.API.Migrations
 
                     b.HasIndex("CourseContentId");
 
-                    b.ToTable("LessonCodes", (string)null);
+                    b.ToTable("LessonCodes");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.Payment", b =>
@@ -595,7 +598,7 @@ namespace ONP.API.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.TrackedJob", b =>
@@ -623,7 +626,7 @@ namespace ONP.API.Migrations
                     b.HasIndex("StudentId", "JobId")
                         .IsUnique();
 
-                    b.ToTable("TrackedJobs", (string)null);
+                    b.ToTable("TrackedJobs");
                 });
 
             modelBuilder.Entity("ONP.API.Entity.Withdrawal", b =>
@@ -652,7 +655,7 @@ namespace ONP.API.Migrations
 
                     b.HasIndex("InstructorId");
 
-                    b.ToTable("Withdrawals", (string)null);
+                    b.ToTable("Withdrawals");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

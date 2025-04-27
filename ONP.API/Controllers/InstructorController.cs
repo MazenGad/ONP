@@ -45,12 +45,18 @@ namespace ONP.API.Controllers
 
 				var avgRating = ratings.Any() ? Math.Round(ratings.Average(), 1) : 0;
 
+				// ✅ نحسب الدخل من جدول Payments
+				var totalRevenue = await _context.Payments
+					.Where(p => p.CourseId == course.Id)
+					.SumAsync(p => (decimal?)p.InstructorShare) ?? 0;
+
 				courseDtos.Add(new InstructorCourseSummaryDto
 				{
 					CourseId = course.Id,
 					Title = course.Title,
 					StudentCount = studentCount,
-					AverageRating = avgRating
+					AverageRating = avgRating,
+					TotalRevenue = totalRevenue
 				});
 			}
 
@@ -58,11 +64,15 @@ namespace ONP.API.Controllers
 			{
 				FullName = user.FullName,
 				Email = user.Email,
+				ProfileImageUrl = user.ProfileImageUrl,
+				TotalEarnings = user.TotalEarnings, //  إجمالي الأرباح
 				Courses = courseDtos
 			};
 
+
 			return Ok(result);
 		}
+
 
 		[HttpPut("profile")]
 		[Authorize(Roles = "Instructor")]
@@ -143,6 +153,110 @@ namespace ONP.API.Controllers
 
 			return Ok(new { imageUrl });
 		}
+
+		[HttpGet("my-courses")]
+		[Authorize(Roles = "Instructor")]
+		public async Task<IActionResult> GetMyCourses()
+		{
+			var user = await _userManager.GetUserAsync(User);
+
+			var courses = await _context.Courses
+				.Where(c => c.InstructorId == user.Id)
+				.Select(c => new
+				{
+					c.Id,
+					c.Title,
+					c.Description,
+					c.CreatedAt,
+					StudentCount = _context.Enrollments.Count(e => e.CourseId == c.Id),
+					AverageRating = _context.CourseRatings
+						.Where(r => r.CourseId == c.Id)
+						.Select(r => r.RatingValue)
+						.DefaultIfEmpty()
+						.Average()
+				})
+				.ToListAsync();
+
+			return Ok(courses);
+		}
+
+		[HttpGet("enrolled-students")]
+		[Authorize(Roles = "Instructor")]
+		public async Task<IActionResult> GetEnrolledStudentsByCourse()
+		{
+			var user = await _userManager.GetUserAsync(User);
+
+			var instructorCourses = await _context.Courses
+				.Where(c => c.InstructorId == user.Id)
+				.Include(c => c.Enrollments)
+					.ThenInclude(e => e.Student)
+				.ToListAsync();
+
+			var result = instructorCourses.Select(c => new
+			{
+				CourseId = c.Id,
+				CourseTitle = c.Title,
+				EnrolledStudents = c.Enrollments.Select(e => e.Student.FullName).ToList()
+			});
+
+			return Ok(result);
+		}
+		[HttpPost("withdraw")]
+		[Authorize(Roles = "Instructor")]
+		public async Task<IActionResult> WithdrawEarnings([FromBody] WithdrawRequestDto request)
+		{
+			if (request.Amount <= 0)
+				return BadRequest("Withdrawal amount must be greater than zero.");
+
+			var instructor = await _userManager.GetUserAsync(User);
+
+			if (instructor.TotalEarnings < request.Amount)
+				return BadRequest("Insufficient balance.");
+
+			// خصم المبلغ
+			instructor.TotalEarnings -= request.Amount;
+
+			// تسجيل عملية السحب
+			var withdrawal = new Withdrawal
+			{
+				InstructorId = instructor.Id,
+				Amount = request.Amount,
+				WithdrawnAt = DateTime.UtcNow,
+				PayPalEmail = request.PayPalEmail
+			};
+
+			_context.Withdrawals.Add(withdrawal);
+			_context.Users.Update(instructor);
+			await _context.SaveChangesAsync();
+
+			return Ok(new
+			{
+				message = $"Successfully withdrew ${request.Amount:F2}",
+				remainingBalance = instructor.TotalEarnings
+			});
+		}
+
+		[HttpGet("withdrawals")]
+		[Authorize(Roles = "Instructor")]
+		public async Task<IActionResult> GetWithdrawals()
+		{
+			var instructor = await _userManager.GetUserAsync(User);
+
+			var withdrawals = await _context.Withdrawals
+				.Where(w => w.InstructorId == instructor.Id)
+				.OrderByDescending(w => w.WithdrawnAt)
+				.Select(w => new
+				{
+					w.Amount,
+					w.PayPalEmail,
+					w.WithdrawnAt
+				})
+				.ToListAsync();
+
+			return Ok(withdrawals);
+		}
+
+
 
 
 

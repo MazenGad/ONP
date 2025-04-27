@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ONP.API.Entity;
+using ONP.API.Migrations;
+using System.Reflection.Emit;
 
 namespace ONP.API.Data
 {
@@ -13,15 +15,20 @@ namespace ONP.API.Data
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Course> Courses { get; set; }
 		public DbSet<CourseContent> CourseContents { get; set; }
+		public DbSet<LessonCode> LessonCodes { get; set; }
 		public DbSet<Enrollment> Enrollments { get; set; }
 		public DbSet<CourseProgress> CourseProgress { get; set; }
 		public DbSet<CourseRating> CourseRatings { get; set; }
+		public DbSet<Withdrawal> Withdrawals { get; set; }
 
 		public DbSet<FavoriteCourse> FavoriteCourses { get; set; }
 		public DbSet<CartItem> CartItems { get; set; }
 
 		public DbSet<Job> Jobs { get; set; }
 		public DbSet<TrackedJob> TrackedJobs { get; set; }
+		public DbSet<CodeSnippet> CodeSnippets { get; set; }
+		public DbSet<Payment> Payments { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
@@ -55,7 +62,7 @@ namespace ONP.API.Data
 
 			builder.Entity<Enrollment>()
 				  .HasOne(e => e.Course)
-				  .WithMany()
+				  .WithMany(c => c.Enrollments)
 				  .HasForeignKey(e => e.CourseId)
 				  .OnDelete(DeleteBehavior.Restrict); // ده مهم
 
@@ -127,6 +134,26 @@ namespace ONP.API.Data
 			builder.Entity<TrackedJob>()
 				.HasIndex(t => new { t.StudentId, t.JobId })
 				.IsUnique(); // يمنع الطالب يضيف نفس الوظيفة مرتين
+
+
+			builder.Entity<Payment>()
+				.HasOne(p => p.Course)
+				.WithMany()
+				.HasForeignKey(p => p.CourseId)
+				.OnDelete(DeleteBehavior.Restrict); // ✅ منع الـ cascade
+
+			builder.Entity<Payment>()
+				.HasOne(p => p.Student)
+				.WithMany()
+				.HasForeignKey(p => p.StudentId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			builder.Entity<CourseContent>()
+			.HasMany(c => c.LessonCodes)
+			.WithOne(s => s.CourseContent)
+			.HasForeignKey(s => s.CourseContentId);
+
+
 		}
 
 	}

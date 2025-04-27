@@ -64,6 +64,7 @@ namespace ONP.API.Controllers
 					Title = e.Course.Title,
 					Category = e.Course.Category.Name,
 					Instructor = e.Course.Instructor.FullName,
+					ImageUrl = e.Course.ImageUrl,
 					EnrolledAt = e.EnrolledAt
 				})
 				.ToListAsync();

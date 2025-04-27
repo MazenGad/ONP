@@ -81,7 +81,9 @@ namespace ONP.API.Controllers
 					CourseId = f.Course.Id,
 					Title = f.Course.Title,
 					InstructorName = f.Course.Instructor.FullName,
-					CategoryName = f.Course.Category.Name
+					CategoryName = f.Course.Category.Name,
+					Price = f.Course.Price,
+					imageUrl = f.Course.ImageUrl
 				})
 				.ToListAsync();
 
@@ -95,6 +97,13 @@ namespace ONP.API.Controllers
 		public async Task<IActionResult> AddToCart(int courseId)
 		{
 			var user = await GetCurrentUserAsync();
+
+
+			var alreadyEnrolled = await _context.Enrollments
+			.AnyAsync(e => e.CourseId == courseId && e.StudentId == user.Id);
+
+			if (alreadyEnrolled)
+				return BadRequest("You are already enrolled in this course.");
 
 			var exists = await _context.CartItems
 				.AnyAsync(c => c.CourseId == courseId && c.StudentId == user.Id);
@@ -145,7 +154,9 @@ namespace ONP.API.Controllers
 					CourseId = c.Course.Id,
 					Title = c.Course.Title,
 					InstructorName = c.Course.Instructor.FullName,
-					CategoryName = c.Course.Category.Name
+					CategoryName = c.Course.Category.Name,
+					Price = c.Course.Price
+
 				})
 				.ToListAsync();
 

@@ -39,6 +39,23 @@ namespace ONP.API.Controllers
 			return Ok(new { message = "Job created", job.Id });
 		}
 
+		[HttpPut("{id}")]
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> UpdateJob(int id, CreateJobDto dto)
+		{
+			var job = await _context.Jobs.FindAsync(id);
+
+			if (job == null)
+				return NotFound("Job not found");
+
+			job.Title = dto.Title;
+			job.Content = dto.Content;
+			job.ContactEmail = dto.ContactEmail;
+
+			await _context.SaveChangesAsync();
+			return Ok("Job updated successfully.");
+		}
+
 		// كل الناس تقدر تشوف الوظائف
 		[HttpGet]
 		[AllowAnonymous]
@@ -99,6 +116,23 @@ namespace ONP.API.Controllers
 
 			await _context.SaveChangesAsync();
 			return Ok("Job tracked successfully.");
+		}
+
+		[HttpDelete("untrack/{jobId}")]
+		[Authorize(Roles = "Student")]
+		public async Task<IActionResult> UntrackJob(int jobId)
+		{
+			var user = await _userManager.GetUserAsync(User);
+
+			var tracked = await _context.TrackedJobs
+				.FirstOrDefaultAsync(t => t.JobId == jobId && t.StudentId == user.Id);
+
+			if (tracked == null)
+				return NotFound("You haven't tracked this job.");
+
+			_context.TrackedJobs.Remove(tracked);
+			await _context.SaveChangesAsync();
+			return Ok("Untracked job successfully.");
 		}
 
 		//  الطالب يشوف الوظايف اللي تتبعها

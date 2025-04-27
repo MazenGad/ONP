@@ -15,6 +15,9 @@
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 		public ICollection<CourseContent> Contents { get; set; }
+		public ICollection<Enrollment> Enrollments { get; set; }
+		public decimal Price { get; set; }
+		public string ImageUrl { get; set; }
 	}
 
 }

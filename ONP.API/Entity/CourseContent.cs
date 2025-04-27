@@ -13,6 +13,9 @@
 		public string? TextContent { get; set; }
 
 		public int Order { get; set; } // ترتيب الظهور في الكورس
+
+		public List<LessonCode> LessonCodes { get; set; } = new();
+
 	}
 
 }

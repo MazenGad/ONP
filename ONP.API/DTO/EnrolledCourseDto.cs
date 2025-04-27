@@ -6,6 +6,8 @@
 		public string Title { get; set; }
 		public string Category { get; set; }
 		public string Instructor { get; set; }
+
+		public string ImageUrl { get; set; }
 		public DateTime EnrolledAt { get; set; }
 	}
 

@@ -11,6 +11,11 @@
 
 		public int EnrolledStudents { get; set; }
 		public double AverageRating { get; set; }
+
+		public decimal Price { get; set; }
+
+		public string ImageUrl { get; set; } // رابط الصورة	
+
 	}
 
 

@@ -7,6 +7,8 @@
 		public string? VideoUrl { get; set; }
 		public string? TextContent { get; set; }
 		public int Order { get; set; }
+		public List<LessonCodesDto>? LessonCodes { get; set; }
+
 	}
 
 }

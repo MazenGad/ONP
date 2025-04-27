@@ -36,7 +36,17 @@ namespace ONP.API.Controllers
 				ContentType = dto.ContentType,
 				VideoUrl = dto.VideoUrl,
 				TextContent = dto.TextContent,
-				Order = dto.Order
+				Order = dto.Order,
+				LessonCodes = dto.LessonCodes != null
+				? dto.LessonCodes.Select(s => new LessonCode
+				{
+					Language = s.Language,
+					Code = s.Code
+				}).ToList()
+				: new List<LessonCode>()
+
+
+
 			};
 
 			_context.CourseContents.Add(content);
@@ -49,7 +59,11 @@ namespace ONP.API.Controllers
 				content.ContentType,
 				content.VideoUrl,
 				content.TextContent,
-				content.Order
+				content.Order,
+				LessonCode = content.LessonCodes.Select(cs => new {
+					cs.Language,
+					cs.Code
+				})
 			});
 		}
 		[HttpGet]
@@ -75,7 +89,8 @@ namespace ONP.API.Controllers
 					c.ContentType,
 					c.VideoUrl,
 					c.TextContent,
-					c.Order
+					c.Order,
+					c.LessonCodes
 				})
 				.ToListAsync();
 

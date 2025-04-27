@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using ONP.API.DTO;
 using ONP.API.Entity;
 using ONP.API.Helpers;
@@ -24,6 +25,12 @@ public class AuthController : ControllerBase
 	[HttpPost("register")]
 	public async Task<IActionResult> Register(RegisterDto dto)
 	{
+		var allowedRoles = new[] { "Student", "Instructor" };
+		if (!allowedRoles.Contains(dto.Role, StringComparer.OrdinalIgnoreCase))
+		{
+			return BadRequest("Invalid role. Only 'Student' or 'Instructor' are allowed.");
+		}
+
 		var user = new ApplicationUser
 		{
 			UserName = dto.Email,
@@ -32,18 +39,26 @@ public class AuthController : ControllerBase
 		};
 
 		var result = await _userManager.CreateAsync(user, dto.Password);
-		if (!result.Succeeded) return BadRequest(result.Errors);
+		if (!result.Succeeded)
+			return BadRequest(result.Errors);
 
-		// Create role if not exists
 		if (!await _roleManager.RoleExistsAsync(dto.Role))
 		{
 			await _roleManager.CreateAsync(new IdentityRole(dto.Role));
 		}
 
 		await _userManager.AddToRoleAsync(user, dto.Role);
+		var roles = await _userManager.GetRolesAsync(user);
+		var token = _jwtHelper.GenerateToken(user, roles);
 
-		return Ok("User registered successfully");
+
+		return Ok(new
+		{
+			token,
+			user = new { user.Id, user.FullName, user.Email, roles }
+		});
 	}
+
 
 	[HttpPost("login")]
 	public async Task<IActionResult> Login(LoginDto dto)
@@ -58,7 +73,7 @@ public class AuthController : ControllerBase
 		return Ok(new
 		{
 			token,
-			user = new { user.Id, user.FullName, user.Email, roles }
+			user = new { user.Id, user.FullName, user.Email, roles , user.ProfileImageUrl }
 		});
 	}
 }
