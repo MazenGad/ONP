@@ -164,6 +164,8 @@ namespace ONP.API.Controllers
 				.Where(c => c.InstructorId == user.Id)
 				.Select(c => new
 				{
+					c.ImageUrl,
+					c.Price,
 					c.Id,
 					c.Title,
 					c.Description,

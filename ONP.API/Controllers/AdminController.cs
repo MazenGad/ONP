@@ -26,11 +26,27 @@ namespace ONP.API.Controllers
 		[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> DashboardOverview()
 		{
+			var users = _userManager.Users.ToList();
+
+			var userRoles = new List<UserRoleDto>();
+
+			foreach (var user in users)
+			{
+				var roles = await _userManager.GetRolesAsync(user);
+				userRoles.Add(new UserRoleDto
+				{
+					Id = user.Id,
+					UserName = user.UserName,
+					FullName = user.FullName,
+					UserRoles = roles.ToList()
+				});
+			}
+
 			var totalCourses = await _context.Courses.CountAsync();
 
-			var totalStudents = await _context.Roles.CountAsync(u => u.Name == "Student");
+			var totalStudents = userRoles.Where(u=>u.UserRoles.Contains("Student")).ToList().Count;
 
-			var totalInstructors = await _context.Roles.CountAsync(u => u.Name == "Instructor");
+			var totalInstructors = userRoles.Where(u => u.UserRoles.Contains("Instructor")).ToList().Count;
 
 			var totalJobs = await _context.Jobs.CountAsync();
 			var admin = _userManager.GetUsersInRoleAsync("Admin").Result.FirstOrDefault();
@@ -130,14 +146,28 @@ namespace ONP.API.Controllers
 		[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> DeleteUser(string userId)
 		{
-			var user = await _userManager.FindByIdAsync(userId);
-			if (user == null)
-				return NotFound("User not found");
-			var result = await _userManager.DeleteAsync(user);
-			if (result.Succeeded)
-				return Ok("User deleted successfully");
-			return BadRequest("Failed to delete user");
+			try
+			{
+				var user = await _userManager.FindByIdAsync(userId);
+				if (user == null)
+					return NotFound("User not found");
+
+				if (await _userManager.IsInRoleAsync(user, "Admin"))
+					return BadRequest("Cannot delete an Admin user.");
+
+				var result = await _userManager.DeleteAsync(user);
+				if (result.Succeeded)
+					return Ok("User deleted successfully");
+
+				return BadRequest("Failed to delete user");
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
 		}
+
+
 
 		[HttpGet("GetAllCourses")]
 
@@ -162,13 +192,28 @@ namespace ONP.API.Controllers
 		[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> DeleteCourse(int courseId)
 		{
-			var course = await _context.Courses.FindAsync(courseId);
-			if (course == null)
-				return NotFound("Course not found");
-			_context.Courses.Remove(course);
-			await _context.SaveChangesAsync();
-			return Ok("Course deleted successfully");
+			try
+			{
+				var course = await _context.Courses.FindAsync(courseId);
+				if (course == null)
+					return NotFound("Course not found");
+
+				_context.Courses.Remove(course);
+				await _context.SaveChangesAsync();
+
+				return Ok("Course deleted successfully");
+			}
+			catch (DbUpdateException ex)
+			{
+				return StatusCode(500, "Cannot delete course: it has active enrollments or associated payments.");
+			}
+			catch (Exception ex)
+			{
+				// لو حصل أي Error غير متوقع
+				return StatusCode(500, $"Internal Server Error: {ex.Message}");
+			}
 		}
+
 
 		[HttpPut("UpdateCourse")]
 		[Authorize(Roles = "Admin")]

@@ -86,24 +86,27 @@ builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowLocalhost", policy =>
 	{
-		policy.WithOrigins("http://127.0.0.1:5500")
+		policy.WithOrigins(
+			"http://127.0.0.1:5500",
+			"https://onp-theta.vercel.app"
+
+			)
 			  .AllowAnyHeader()
-			  .AllowAnyMethod();
+			  .AllowAnyMethod()
+			  .AllowCredentials();
 	});
 });
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-	app.UseSwagger();
-	app.UseSwaggerUI(c =>
-	{
-		c.SwaggerEndpoint("/swagger/v1/swagger.json", "ONP API V1");
-		c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
-	});
-}
+	c.SwaggerEndpoint("/swagger/v1/swagger.json", "ONP API V1");
+	c.RoutePrefix = string.Empty;
+});
+
 
 app.UseHttpsRedirection();
 app.UseCors("AllowLocalhost");
